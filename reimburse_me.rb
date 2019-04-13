@@ -23,26 +23,58 @@ require 'pry'
   ]
 ]
 
-# set = ARGV[0]
-#
-# def get_set(set)
-#   case set
-#   when set == 'set_1'
-#     @set_1
-#   when set == 'set_2'
-#     @set_2
-#   when set == 'set_3'
-#     @set_3
-#   when set == 'set_4'
-#     @set_4
-# end
+arg = ARGV[0]
 
-
-def get_dates(@sets)
-  binding.pry
+def get_set(arg)
+  case arg
+  when "set_1"
+    data = @sets.first
+  when "set_2"
+    data = @sets[1]
+  when "set_3"
+    data = @sets[2]
+  when "set_4"
+    data = @sets.last
+  when nil
+    data = @sets
+  end
+  data
 end
 
-set_1_answer = []
-set_2_answer = []
-set_3_answer = []
-set_4_answer = []
+@data = get_set(arg)
+puts @data
+
+
+
+def get_dates(data)
+  if data.first.class == Array # for full data set
+    data.each_with_index do |proj, i|
+      binding.pry
+      @dates_array = arrayify_dates(proj)
+    end
+  else # for individual data set
+    @dates_array = arrayify_dates(data)
+    @dates_array
+  end
+end
+
+def arrayify_dates(set)
+  @all_dates = []
+  set.each_with_index do |d, i|
+    sd = Date.parse(d[:sd])
+    ed = Date.parse(d[:ed])
+    dates = [sd, ed]
+    @all_dates.push(dates)
+  end
+  @all_dates
+end
+
+get_dates(@data)
+
+
+
+
+@set_1_answer = []
+@set_2_answer = []
+@set_3_answer = []
+@set_4_answer = []
