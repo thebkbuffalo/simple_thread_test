@@ -72,14 +72,19 @@ def figure_out_multiple_days(set)
   @proj_count = (1..@set.count).to_a
   @reimbursment_to_add_up = []
   @set.each_with_index do |proj, i|
+    cost = cost_breakdown(proj[:cost])
+    @travel = cost[:travel]
+    @full = cost[:full]
     if proj[:days] == 0
-      cost = cost_breakdown(proj[:cost])
-      travel = cost[:travel]
-      full = cost[:full]
-      reimbursment = travel + full
+      reimbursment = @travel + @full
       @reimbursment_to_add_up.push(reimbursment)
     else
-
+      days = (1..proj[:days]).to_a
+      full_days = days.tap{|x| x.pop; x.shift}
+      travel_days_cost = @travel * 2
+      full_days_cost = full_days.count * @full
+      reimbursment = travel_days_cost + full_days_cost
+      @reimbursment_to_add_up.push(reimbursment)
     end
   end
   @reimbursment_to_add_up
