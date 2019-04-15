@@ -31,7 +31,7 @@ def get_reimbursment_breakdown(sets)
     @reimbursments_per_set = figure_costs(@proj_breakdown)
     puts 'Set ' + (i + 1).to_s
     i = []
-    i.push(@reimbursments_per_set)
+    i.push('$' + @reimbursments_per_set.to_s + ' to be reimbursed')
     puts i
     puts @proj_dates
     puts @proj_costs
@@ -62,26 +62,44 @@ def cost_breakdown(cost)
   if cost == 'low'
     @trip_costs = {travel: 45, full: 75}
   else
-    @trip_costs = [travel: 55, full: 85]
+    @trip_costs = {travel: 55, full: 85}
   end
   @trip_costs
+end
+
+def figure_out_multiple_days(set)
+  @set = set
+  @proj_count = (1..@set.count).to_a
+  @reimbursment_to_add_up = []
+  @set.each_with_index do |proj, i|
+    if proj[:days] == 0
+      cost = cost_breakdown(proj[:cost])
+      travel = cost[:travel]
+      full = cost[:full]
+      reimbursment = travel + full
+      @reimbursment_to_add_up.push(reimbursment)
+    else
+
+    end
+  end
+  @reimbursment_to_add_up
 end
 
 def figure_costs(set)
   @set = set
   if @set.count == 1
-    days_count = @set.first[:days]
-    if days_count == 0
+    @single_proj_days_count = @set.first[:days]
+    if @single_proj_days_count == 0
       cost = cost_breakdown(@set.first[:cost])
       travel = cost[:travel]
       full = cost[:full]
       @reimbursment = travel + full
     else
-
+      # here would be logic for single project with multiple days...will fill this in when i figure it out
     end
   else
-    proj_count = (0..@set.count).to_a
-    @reimbursment = 'here will be totaled reimbursments'
+    @reimbursment = figure_out_multiple_days(@set).sum
+    # @reimbursment = 'here will be totaled reimbursments'
   end
   @reimbursment
 end
