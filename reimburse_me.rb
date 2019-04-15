@@ -27,13 +27,84 @@ def get_reimbursment_breakdown(sets)
   @sets.each_with_index do |set, i|
     @proj_dates = arrayify_dates(set)
     @proj_costs = get_proj_cost(set)
-    # @proj_breakdown = breakdown(@proj_dates, @proj_costs)
+    @proj_breakdown = breakdown(@proj_dates, @proj_costs)
+    @reimbursments_per_set = figure_costs(@proj_breakdown)
     puts 'Set ' + (i + 1).to_s
+    i = []
+    i.push(@reimbursments_per_set)
+    puts i
     puts @proj_dates
     puts @proj_costs
     puts '------------------------------------------------------------------------------------------------'
   end
 end
+
+def arrayify_dates(set)
+  @all_dates = []
+  set.each do |d|
+    sd = Date.parse(d[:sd])
+    ed = Date.parse(d[:ed])
+    dates = [sd, ed]
+    @all_dates.push(dates)
+  end
+  @all_dates
+end
+
+def get_proj_cost(set)
+  @all_costs = []
+  set.each do |s|
+    @all_costs.push(s[:cost])
+  end
+  @all_costs
+end
+
+def cost_breakdown(cost)
+  if cost == 'low'
+    @trip_costs = {travel: 45, full: 75}
+  else
+    @trip_costs = [travel: 55, full: 85]
+  end
+  @trip_costs
+end
+
+def figure_costs(set)
+  @set = set
+  if @set.count == 1
+    days_count = @set.first[:days]
+    if days_count == 0
+      cost = cost_breakdown(@set.first[:cost])
+      travel = cost[:travel]
+      full = cost[:full]
+      @reimbursment = travel + full
+    else
+
+    end
+  else
+    proj_count = (0..@set.count).to_a
+    @reimbursment = 'here will be totaled reimbursments'
+  end
+  @reimbursment
+end
+
+
+def breakdown(proj_dates, proj_costs)
+  @days_per_set_with_cost = []
+  proj_dates.each_with_index do |dates, i|
+    cost_level = proj_costs[i]
+    sd = dates.first
+    ed = dates.last
+    days_count = (ed - sd).to_i / 24
+    @days_per_set_with_cost.push({cost: cost_level, days: days_count, sd: sd, ed: ed})
+  end
+  @days_per_set_with_cost
+end
+
+get_reimbursment_breakdown(@sets)
+# @set_1_answer = []
+# @set_2_answer = []
+# @set_3_answer = []
+# @set_4_answer = []
+
 
 # def get_dates_breakdown(sets)
 #   @sets.each_with_index do |set, i|
@@ -59,44 +130,6 @@ end
 #   end
 # end
 
-def arrayify_dates(set)
-  @all_dates = []
-  set.each do |d|
-    sd = Date.parse(d[:sd])
-    ed = Date.parse(d[:ed])
-    dates = [sd, ed]
-    @all_dates.push(dates)
-  end
-  @all_dates
-end
-
-def get_proj_cost(set)
-  @all_costs = []
-  set.each do |s|
-    @all_costs.push(s[:cost])
-  end
-  @all_costs
-end
-
-def breakdown(proj_dates, proj_costs)
-  @low_travel_day = 45
-  @high_travel_day = 55
-  @low_full_day = 75
-  @high_full_day = 85
-  proj_dates.each_with_index do |dates, i|
-    cost_level = proj_costs[i]
-    sd = dates.first
-    ed = dates.last
-    if sd == ed
-      # single day situation...not sure how that payment would work but once i do these shouldn't be hard
-    else
-      date_range = ed - sd
-      binding.pry
-    end
-  end
-end
-
-get_reimbursment_breakdown(@sets)
 
 # broader ambitions
 # arg = ARGV[0]
@@ -159,11 +192,3 @@ get_reimbursment_breakdown(@sets)
 #
 # @dates_to_compare = get_dates(@data)
 # puts @dates_to_compare
-
-
-
-
-@set_1_answer = []
-@set_2_answer = []
-@set_3_answer = []
-@set_4_answer = []
