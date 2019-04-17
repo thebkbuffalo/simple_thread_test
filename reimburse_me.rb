@@ -78,7 +78,7 @@ def get_travel_and_full_days(proj_dates)
       if @proj_dates[x]&.last == @proj_dates[x+1]&.first # overlapping travel days
         @travel_days.push(1)
       else # days btwn travel days
-        btwn_days = (@proj_dates[x].last - @proj_dates[x+1].first).to_i / 24
+        btwn_days = (@proj_dates[x+1].first - @proj_dates[x].last).to_i / 24
         @travel_days.push(btwn_days)
       end
       # full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
