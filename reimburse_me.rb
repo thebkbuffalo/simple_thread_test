@@ -65,91 +65,75 @@ def cost_breakdown(cost)
   @trip_costs
 end
 
-def get_travel_and_full_days(proj_dates)
+def get_travel_and_full_days(proj_dates, set)
   @proj_dates = proj_dates
-  @travel_days = []
-  @full_days = []
+  @travel_days_before_calculation = []
+  @travel_days_after_calculation = []
+  @full_days_before_calculation = []
+  @full_days_after_calculation = []
   x = 0
   until x == @proj_dates.count
+    @cost = cost_breakdown(set[x][:cost])
     if x == 0 # first project
-      @travel_days.push(1)
+      @travel_days_before_calculation.push(1)
     end
     unless x.equal? @proj_dates.count - 1
       if @proj_dates[x]&.last == @proj_dates[x+1]&.first # overlapping travel days
-        @travel_days.push(1)
+        @travel_days_before_calculation.push(1)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
         if full_days == 0
           full_days = full_days + 1
         else
           full_days = full_days - 2
         end
-        @full_days.push(full_days)
+        @full_days_before_calculation.push(full_days)
       else # days btwn travel days
         btwn_days = (@proj_dates[x+1].first - @proj_dates[x].last).to_i / 24
-        @travel_days.push(btwn_days)
+        @travel_days_before_calculation.push(btwn_days)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
         if full_days == 0
           full_days = full_days + 1
         else
           full_days = full_days - 1
         end
-        @full_days.push(full_days)
+        @full_days_before_calculation.push(full_days)
       end
     else # last project
       if @proj_dates[x]&.first == @proj_dates[x-1]&.last
-        @travel_days.push(1)
+        @travel_days_before_calculation.push(1)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
         if full_days == 0
           full_days = full_days + 1
         else
           full_days = full_days - 1
         end
+        @full_days_before_calculation.push(full_days)
       else
-        @travel_days.push(2)
+        @travel_days_before_calculation.push(2)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
         if full_days == 0
           full_days = full_days + 1
         else
           full_days = full_days - 2
         end
+        @full_days_before_calculation.push(full_days)
       end
     end
+    tday_calc = @travel_days_before_calculation.sum * @cost[:travel]
+    @travel_days_after_calculation.push(tday_calc)
+    fday_calc = @full_days_before_calculation.sum * @cost[:full]
+    @full_days_after_calculation.push(fday_calc)
     x += 1
   end
-  @breakdown = {travel_days: @travel_days, full_days: @full_days}
+  @breakdown = {travel_days: @travel_days_after_calculation, full_days: @full_days_after_calculation}
   @breakdown
-end
-
-def figure_out_multiple_days(set, proj_dates)
-  @set = set
-  @proj_dates = proj_dates
-  @proj_count = (1..@set.count).to_a
-  # @reimbursment_to_add_up = []
-  @travel_full_breakdown = get_travel_and_full_days(@proj_dates)
-  binding.pry
-  # @set.each_with_index do |proj, i|
-  #   cost = cost_breakdown(proj[:cost])
-  #   @travel = cost[:travel]
-  #   @full = cost[:full]
-  #   if proj[:days] <= 3
-  #     proj[:days] = proj[:days] + 1
-  #   end
-  #   days = (1..proj[:days]).to_a
-  #   full_days = days.tap{|x| x.pop; x.shift}
-  #   travel_days_cost = @travel * 2
-  #   full_days_cost = full_days.count * @full
-  #   reimbursment = travel_days_cost + full_days_cost
-  #   @reimbursment_to_add_up.push(reimbursment)
-  #   # end
-  # end
-  # @reimbursment_to_add_up =
 end
 
 def figure_costs(set, proj_dates)
   @set = set
   @proj_dates = proj_dates
 
-  if @set.count == 1
+  if @set.count == 1 #single day proj
     @single_proj_days_count = @set.first[:days]
     if @single_proj_days_count == 0
       cost = cost_breakdown(@set.first[:cost])
@@ -166,8 +150,9 @@ def figure_costs(set, proj_dates)
       reimbursment = travel_days_cost + full_days_cost
       @reimbursment.push(reimbursment).sum
     end
-  else
-    @reimbursment = figure_out_multiple_days(@set, @proj_dates)
+  else # multi day proj
+    to_add_up = get_travel_and_full_days(@proj_dates, @set)
+    @reimbursment = to_add_up[:travel_days].sum + to_add_up[:full_days].sum
   end
   @reimbursment
 end
