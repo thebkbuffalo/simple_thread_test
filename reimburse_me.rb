@@ -65,6 +65,15 @@ def cost_breakdown(cost)
   @trip_costs
 end
 
+def full_days_breakdown(full_days, ol_or_dp)
+  if full_days == 0
+    full_days = full_days + 1
+  else
+    full_days = full_days - ol_or_dp
+  end
+  @full_days = full_days
+end
+
 def get_travel_and_full_days(proj_dates, set)
   @proj_dates = proj_dates
   @travel_days_before_calculation = []
@@ -78,44 +87,28 @@ def get_travel_and_full_days(proj_dates, set)
       @travel_days_before_calculation.push(1)
     end
     unless x.equal? @proj_dates.count - 1
-      if @proj_dates[x]&.last == @proj_dates[x+1]&.first # overlapping travel days
+      if @proj_dates[x]&.last == @proj_dates[x+1]&.first # overlapping travel days "ol"
         @travel_days_before_calculation.push(1)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        if full_days == 0
-          full_days = full_days + 1
-        else
-          full_days = full_days - 2
-        end
+        @full_days = full_days_breakdown(full_days, 1)
         @full_days_before_calculation.push(full_days)
-      else # days btwn travel days
+      else # days btwn travel days "dp"
         btwn_days = (@proj_dates[x+1].first - @proj_dates[x].last).to_i / 24
         @travel_days_before_calculation.push(btwn_days)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        if full_days == 0
-          full_days = full_days + 1
-        else
-          full_days = full_days - 1
-        end
+        @full_days = full_days_breakdown(full_days, 2)
         @full_days_before_calculation.push(full_days)
       end
     else # last project
       if @proj_dates[x]&.first == @proj_dates[x-1]&.last
         @travel_days_before_calculation.push(1)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        if full_days == 0
-          full_days = full_days + 1
-        else
-          full_days = full_days - 1
-        end
+        @full_days = full_days_breakdown(full_days, 1)
         @full_days_before_calculation.push(full_days)
       else
         @travel_days_before_calculation.push(2)
         full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        if full_days == 0
-          full_days = full_days + 1
-        else
-          full_days = full_days - 2
-        end
+        @full_days = full_days_breakdown(full_days, 2)
         @full_days_before_calculation.push(full_days)
       end
     end
