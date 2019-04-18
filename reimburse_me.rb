@@ -84,34 +84,26 @@ def get_travel_and_full_days(proj_dates, set)
   until x == @proj_dates.count
     @cost = cost_breakdown(set[x][:cost])
     if x == 0 # first project
-      @travel_days_before_calculation.push(1)
+      @travel_days_before_calculation.push(1) # first day always travel day
     end
-    unless x.equal? @proj_dates.count - 1
+    unless x.equal? @proj_dates.count - 1 # all projects minus the last
       if @proj_dates[x]&.last == @proj_dates[x+1]&.first # overlapping travel days "ol"
         @travel_days_before_calculation.push(1)
-        full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        @full_days = full_days_breakdown(full_days, 1)
-        @full_days_before_calculation.push(full_days)
       else # days btwn travel days "dp"
         btwn_days = (@proj_dates[x+1].first - @proj_dates[x].last).to_i / 24
         @travel_days_before_calculation.push(btwn_days)
-        full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        @full_days = full_days_breakdown(full_days, 2)
-        @full_days_before_calculation.push(full_days)
       end
     else # last project
       if @proj_dates[x]&.first == @proj_dates[x-1]&.last
         @travel_days_before_calculation.push(1)
-        full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        @full_days = full_days_breakdown(full_days, 1)
-        @full_days_before_calculation.push(full_days)
       else
         @travel_days_before_calculation.push(2)
-        full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
-        @full_days = full_days_breakdown(full_days, 2)
-        @full_days_before_calculation.push(full_days)
       end
     end
+    ol_or_dp = @proj_dates[x]&.last == @proj_dates[x+1]&.first ? 1 : 2
+    full_days = (@proj_dates[x]&.last - @proj_dates[x]&.first).to_i / 24
+    @full_days = full_days_breakdown(full_days, ol_or_dp)
+    @full_days_before_calculation.push(full_days)
     tday_calc = @travel_days_before_calculation.sum * @cost[:travel]
     @travel_days_after_calculation.push(tday_calc)
     fday_calc = @full_days_before_calculation.sum * @cost[:full]
@@ -125,7 +117,6 @@ end
 def figure_costs(set, proj_dates)
   @set = set
   @proj_dates = proj_dates
-
   if @set.count == 1 #single day proj
     @single_proj_days_count = @set.first[:days]
     if @single_proj_days_count == 0
@@ -166,35 +157,7 @@ end
 get_reimbursment_breakdown(@sets)
 
 
-# @set_1_answer = []
-# @set_2_answer = []
-# @set_3_answer = []
-# @set_4_answer = []
 
-
-# def get_dates_breakdown(sets)
-#   @sets.each_with_index do |set, i|
-#     case i
-#     when 0
-#       @proj_dates = arrayify_dates(set)
-#       @proj_costs = get_proj_cost(set)
-#       @proj_breakdown = breakdown(@proj_dates, @proj_costs)
-#       puts "here will be answer per project"
-#     when 1
-#       @proj_dates = arrayify_dates(set)
-#       @proj_costs = get_proj_cost(set)
-#       @proj_breakdown = breakdown(@proj_dates, @proj_costs)
-#     when 2
-#       @proj_dates = arrayify_dates(set)
-#       @proj_dates = get_proj_cost(set)
-#       @proj_breakdown = breakdown(@proj_dates, @proj_costs)
-#     when 3
-#       @proj_dates = arrayify_dates(set)
-#       @proj_dates = get_proj_cost(set)
-#       @proj_breakdown = breakdown(@proj_dates, @proj_costs)
-#     end
-#   end
-# end
 
 
 # broader ambitions
