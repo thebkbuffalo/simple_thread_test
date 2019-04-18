@@ -1,3 +1,5 @@
 # simple_thread_test
 
-This can be run by simply running ruby reimburse_me.rb or you can run an individual set by running the command with said set, for ex: ruby reimburse_me.rb set_3 if you want just an individual set of data.
+Here is my answer to the challenge. I kept it as simple as possible and I think this is right.  To be honest I'm not entirely sure I have my calculations correct in terms of travel and full days for projects that press up against each other or overlap, but I do believe my answer is solid and can be used with any data long as said data is in the same format.
+
+to run clone down, cd into the folder and run `ruby reimburse_me.rb`
